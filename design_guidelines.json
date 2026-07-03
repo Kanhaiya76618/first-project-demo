@@ -1,0 +1,169 @@
+{
+  "theme_and_archetype": {
+    "domain": "Game UI Kit / Interactive Prototype",
+    "theme": "Dark",
+    "archetype": "1 (Organic & Earthy) - Modified for Cinematic Magical Realism",
+    "core_aesthetic": "Deep jungle ruins at night illuminated by bioluminescence and magic.",
+    "forbidden_elements": [
+      "Purple fog",
+      "Navy dungeon look",
+      "Generic AI-slop gradients",
+      "Inter, Roboto, or generic system fonts",
+      "Centered-everything layout (use asymmetrical/organic placements)"
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "heading": "'Cinzel Decorative', serif",
+      "body": "'Lora', serif",
+      "mono": "'JetBrains Mono', monospace"
+    },
+    "scales": {
+      "h1": "text-5xl md:text-6xl tracking-tight leading-none text-bone",
+      "h2": "text-3xl md:text-4xl tracking-tight text-bone",
+      "h3": "text-2xl text-stone-300",
+      "body": "text-base md:text-lg leading-relaxed text-stone-300",
+      "label": "text-xs tracking-[0.2em] uppercase text-cyan-accent font-bold"
+    },
+    "import_links": [
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap"
+    ]
+  },
+  "colors": {
+    "base": {
+      "moss-dark": "#131A14",
+      "moss-mid": "#1C2A1E",
+      "moss-light": "#2A3F2D",
+      "stone-dark": "#1E201E",
+      "stone-mid": "#363A36",
+      "stone-light": "#4F554F",
+      "earth-brown": "#382918",
+      "bone": "#E8EDE6"
+    },
+    "accents": {
+      "cyan-mist": "#00E5FF",
+      "ember-orange": "#FF6B35"
+    },
+    "css_variables": {
+      "--color-moss-dark": "#131A14",
+      "--color-moss-mid": "#1C2A1E",
+      "--color-moss-light": "#2A3F2D",
+      "--color-stone-dark": "#1E201E",
+      "--color-stone-mid": "#363A36",
+      "--color-stone-light": "#4F554F",
+      "--color-earth-brown": "#382918",
+      "--color-bone": "#E8EDE6",
+      "--color-cyan-mist": "#00E5FF",
+      "--color-ember-orange": "#FF6B35"
+    }
+  },
+  "component_recipes": {
+    "glassmorphism": {
+      "description": "Frosted glass panels for question popups and level nodes.",
+      "classes": "bg-moss-dark/40 backdrop-blur-xl border border-t-cyan-mist/30 border-l-cyan-mist/30 border-r-stone-dark border-b-stone-dark shadow-[0_8px_32px_rgba(0,229,255,0.15)] rounded-2xl"
+    },
+    "carved_stone": {
+      "description": "Pure CSS carved stone borders for dialogue boxes and heavy UI.",
+      "classes": "bg-stone-mid border-4 border-stone-dark rounded-xl shadow-[inset_4px_4px_8px_rgba(0,0,0,0.6),inset_-4px_-4px_8px_rgba(255,255,255,0.05),0_8px_16px_rgba(0,0,0,0.5)] relative overflow-hidden",
+      "enhancement": "Add a pseudo-element before/after with border-t-2 border-l-2 border-stone-light/20 to simulate the highlight of the bevel."
+    },
+    "vine_border": {
+      "description": "Organic borders for HUD bars like XP.",
+      "wrapper_classes": "relative bg-moss-dark border-2 border-moss-light rounded-full overflow-hidden p-1 shadow-[inset_0_4px_8px_rgba(0,0,0,0.8)]",
+      "fill_classes": "h-full bg-gradient-to-r from-moss-light to-cyan-mist rounded-full relative",
+      "overlay_svg": "Overlay an SVG path with stroke-width 1 and stroke #2A3F2D (moss-light) forming twisting sine-wave shapes over the bar."
+    }
+  },
+  "motion_patterns": {
+    "glow_pulse": {
+      "framer_motion": { "animate": { "boxShadow": ["0 0 10px #00E5FF", "0 0 25px #00E5FF", "0 0 10px #00E5FF"] }, "transition": { "duration": 2, "repeat": "Infinity", "ease": "easeInOut" } }
+    },
+    "ember_drift": {
+      "framer_motion": { "animate": { "y": [0, -20], "x": [-5, 5, -5], "opacity": [0, 1, 0] }, "transition": { "duration": 3, "repeat": "Infinity", "ease": "linear" } }
+    },
+    "cyan_mist": {
+      "css_animation": "animate-[pan_10s_linear_infinite] bg-[length:200%_100%] bg-gradient-to-r from-transparent via-cyan-mist/10 to-transparent"
+    },
+    "shake_on_wrong": {
+      "framer_motion": { "animate": { "x": [-10, 10, -10, 10, 0] }, "transition": { "duration": 0.4 } }
+    },
+    "typewriter_reveal": {
+      "framer_motion_container": { "hidden": { "opacity": 1 }, "visible": { "transition": { "staggerChildren": 0.05 } } },
+      "framer_motion_child": { "hidden": { "opacity": 0, "y": 5 }, "visible": { "opacity": 1, "y": 0 } }
+    },
+    "node_bloom_in": {
+      "framer_motion": { "initial": { "scale": 0.8, "opacity": 0 }, "animate": { "scale": [0.8, 1.1, 1], "opacity": 1, "boxShadow": ["0 0 0px #00E5FF", "0 0 40px #00E5FF", "0 0 15px #00E5FF"] }, "transition": { "duration": 0.6, "ease": "easeOut" } }
+    }
+  },
+  "screens": {
+    "world_map": {
+      "layout": "Vertically scrolling container (S-curve). Desktop uses max-w-md center column with side panel art.",
+      "nodes": "50 levels total, 5 zones. Boss nodes every 10 levels. Use absolute positioning with percentage top/left to form the S-curve.",
+      "components": ["Glassmorphism Level Nodes", "Parallax Scenery Layers", "NPC Sprites (idle A/B)"]
+    },
+    "small_level": {
+      "layout": "Playfield occupying upper 60%, Question Card lower 40%.",
+      "components": ["Tappable Monsters", "Glassmorphism Question Popup", "Vine Timer Bar", "HUD (HP Gems, XP Bar, Relic Coins)"]
+    },
+    "boss_level": {
+      "layout": "Cinematic split. Boss at top, player at bottom-left. Dialogue box spanning bottom.",
+      "components": ["Segmented Stone HP Bar", "RPG Dialogue System (Typewriter)", "Pose-swapping Characters (Idle/Attack/Hurt)"]
+    },
+    "component_library": {
+      "layout": "Bento grid presentation of all components.",
+      "sections": ["Typography", "Colors", "Nodes", "HUD", "Cards", "Buttons"]
+    },
+    "sprite_sheet": {
+      "layout": "Export-ready grid.",
+      "specs": "Aligned rows of characters, transparent backgrounds, clear boundaries, mono-spaced debug labels below each sprite."
+    }
+  },
+  "desktop_scenery_approach": {
+    "description": "On desktop (1440x900), the mobile view (390x844) stays locked in the center as an interactive 'device'. The left and right margins fill with parallax scenery.",
+    "left_panel": "Giant carved jungle statues, cascading vines.",
+    "right_panel": "Luminescent waterfall falling into a misty abyss, glowing cyan plants."
+  },
+  "image_assets_and_prompts": {
+    "nano_banana_prompts": [
+      {
+        "category": "background",
+        "name": "world_map_bg",
+        "prompt": "Cinematic vertical scrolling background of deep ancient jungle ruins, mossy stone carved pathways winding upwards, glowing cyan mist #00E5FF illuminating the darkness, bioluminescent flora, volumetric light shafts, deep earthy browns and mossy greens, magical realism, 2D game art style, highly detailed painterly texture.",
+        "fallback_url": "https://images.unsplash.com/photo-1513733582371-0adb4dac50f6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHxhbmNpZW50JTIwanVuZ2xlJTIwcnVpbnN8ZW58MHx8fHwxNzgzMDcxMTMzfDA&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "background",
+        "name": "boss_cavern_bg",
+        "prompt": "Cinematic 2D game background of an underground ruin cavern, giant ancient carved stone deity face in the wall, glowing ember orange #FF6B35 lava fissures, cyan #00E5FF glowing runes, high contrast lighting, dark magical realism.",
+        "fallback_url": "https://images.unsplash.com/photo-1637407082601-2689ab45a6a6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwyfHxhbmNpZW50JTIwanVuZ2xlJTIwcnVpbnN8ZW58MHx8fHwxNzgzMDcxMTMzfDA&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "character",
+        "name": "player_explorer",
+        "prompt": "Sprite sheet pose of a chibi 2D explorer character with a bright red scarf, holding a glowing cyan magic lantern, thick black outlines, painterly texture, deep moss green clothing, cinematic lighting, transparent background.",
+        "fallback_url": "https://images.unsplash.com/photo-1779030056899-0b262a62a52d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzV8MHwxfHNlYXJjaHwzfHxzdG9uZSUyMGNhcnZpbmclMjB0ZXh0dXJlfGVufDB8fHx8MTc4MzA3MTEzM3ww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "character",
+        "name": "stone_deity_boss",
+        "prompt": "Sprite sheet pose of a giant Stone Deity Guardian boss monster, made of cracked mossy ruins, glowing ember orange #FF6B35 eyes and core, thick black outlines, chibi but menacing 2D game art style, transparent background.",
+        "fallback_url": "https://images.unsplash.com/photo-1701964621410-7ba68273cc38?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzV8MHwxfHNlYXJjaHwyfHxzdG9uZSUyMGNhcnZpbmclMjB0ZXh0dXJlfGVufDB8fHx8MTc4MzA3MTEzM3ww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "scenery",
+        "name": "desktop_waterfall_right",
+        "prompt": "Cinematic jungle waterfall scenery, glowing cyan water flowing over dark stone ruins, volumetric lighting, magical realism game art.",
+        "fallback_url": "https://images.unsplash.com/photo-1511936606692-5e0d73f6b638?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwxfHxqdW5nbGUlMjB3YXRlcmZhbGwlMjBzY2VuZXJ5fGVufDB8fHx8MTc4MzA3MTEzM3ww&ixlib=rb-4.1.0&q=85"
+      }
+    ]
+  },
+  "testing_guidelines": {
+    "attributes": [
+      "All interactive elements MUST use data-testid",
+      "Example: data-testid='level-node-10-boss'",
+      "Example: data-testid='question-card-option-a'",
+      "Example: data-testid='dialogue-next-button'",
+      "Example: data-testid='hud-hp-gem-1'"
+    ]
+  }
+}
