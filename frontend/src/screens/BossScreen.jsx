@@ -3,14 +3,38 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Shield } from "lucide-react";
 import { IMG, BOSS_DIALOGUE, SAMPLE_QUESTION, LEVELS } from "../data/game";
+import {
+  MEMORY_SHARDS,
+  RECALLED_DIALOGUE,
+  MEMORY_GAUGE,
+  BOSS_IDENTITY,
+} from "../data/memory";
 import { HUD } from "../components/HUD";
 import { DialogueBox } from "../components/DialogueBox";
 import { QuestionCard } from "../components/QuestionCard";
 import { EmberParticles, CyanMist, LightShaft, MotionScreen } from "../components/Atmosphere";
+import { MemorySidebar, MemoryTrigger } from "../components/MemorySidebar";
+import { MemoryGauge } from "../components/MemoryGauge";
+import {
+  RecallingBossOverlay,
+  RecallingVignette,
+} from "../components/RecallingOverlay";
 
-// Segmented stone HP bar for boss
-const BossHP = ({ segs = 10, filled = 7 }) => (
-  <div className="stone-hp" data-testid="boss-hp-bar">
+// Segmented stone HP bar for boss — with optional EMPOWERED frame glow
+const BossHP = ({ segs = 10, filled = 7, empowered = false }) => (
+  <div
+    className="stone-hp"
+    data-testid="boss-hp-bar"
+    style={
+      empowered
+        ? {
+            boxShadow:
+              "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 22px rgba(255,107,53,0.7)",
+            borderColor: "#FF6B35",
+          }
+        : undefined
+    }
+  >
     {Array.from({ length: segs }).map((_, i) => (
       <div key={i} className={`stone-hp-seg ${i >= filled ? "stone-hp-seg-empty" : ""}`} />
     ))}
@@ -23,12 +47,18 @@ export default function BossScreen() {
   const level = LEVELS[(parseInt(num) || 10) - 1] || LEVELS[9];
 
   const [dialogueIdx, setDialogueIdx] = useState(0);
-  const [phase, setPhase] = useState("dialogue"); // dialogue | question | attacking | victory
+  // phase: dialogue | sidebar | recalling | recalled | question | attacking | victory
+  const [phase, setPhase] = useState("dialogue");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bossHp, setBossHp] = useState(10);
   const [playerHp, setPlayerHp] = useState(5);
-  const [bossPose, setBossPose] = useState("idle");
+  const [bossPose, setBossPose] = useState("idle"); // idle | attack | hurt | recalling
   const [playerPose, setPlayerPose] = useState("idle");
   const [shakeKey, setShakeKey] = useState(0);
+  const [memoryFilled, setMemoryFilled] = useState(MEMORY_GAUGE.filled);
+  const [recalledIdx, setRecalledIdx] = useState(0);
+
+  const empowered = memoryFilled >= MEMORY_GAUGE.segments;
 
   const advanceDialogue = () => {
     if (dialogueIdx < BOSS_DIALOGUE.length - 1) {
@@ -38,7 +68,35 @@ export default function BossScreen() {
     }
   };
 
+  const openSidebar = () => {
+    setSidebarOpen(true);
+    setPhase("sidebar");
+  };
+
+  // Closing sidebar triggers the RECALLING → RECALLED dialogue → question chain.
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+    setBossPose("recalling");
+    setPhase("recalling");
+    // Hold RECALLING pose for ~1.8s, then show RECALLED dialogue
+    setTimeout(() => {
+      setBossPose("idle");
+      setPhase("recalled");
+    }, 1800);
+  };
+
+  const advanceRecalled = () => {
+    if (recalledIdx < RECALLED_DIALOGUE.length - 1) {
+      setRecalledIdx(recalledIdx + 1);
+    } else {
+      setPhase("question");
+    }
+  };
+
   const handleAnswer = (ok) => {
+    // Each answer fills one more memory-gauge segment
+    setMemoryFilled((v) => Math.min(MEMORY_GAUGE.segments, v + 1));
+
     if (ok) {
       setPlayerPose("attack");
       setBossPose("hurt");
@@ -73,8 +131,22 @@ export default function BossScreen() {
     setPhase("attacking");
   };
 
-  const bossImg = bossPose === "attack" ? IMG.boss_attack : bossPose === "hurt" ? IMG.boss_hurt : IMG.boss_idle;
-  const playerImg = playerPose === "attack" ? IMG.player_attack : playerPose === "hurt" ? IMG.player_hurt : IMG.player_idle;
+  // Boss image source per pose (RECALLING reuses idle + CSS overlay)
+  const bossImg =
+    bossPose === "attack"
+      ? IMG.boss_attack
+      : bossPose === "hurt"
+        ? IMG.boss_hurt
+        : IMG.boss_idle;
+
+  const playerImg =
+    playerPose === "attack"
+      ? IMG.player_attack
+      : playerPose === "hurt"
+        ? IMG.player_hurt
+        : IMG.player_idle;
+
+  const isRecalling = bossPose === "recalling";
 
   return (
     <MotionScreen>
@@ -107,44 +179,66 @@ export default function BossScreen() {
               GUARDIAN {level.zoneIndex + 1}
             </span>
           </div>
+          <MemoryTrigger
+            onClick={openSidebar}
+            active={sidebarOpen}
+            count={MEMORY_SHARDS.length}
+          />
         </div>
 
-        {/* Boss HP */}
-        <div className="glass-panel-ember p-2.5 space-y-1.5">
+        {/* Boss HP + Memory Gauge row */}
+        <div
+          className="glass-panel-ember p-2.5 space-y-2"
+          style={
+            empowered
+              ? { boxShadow: "0 12px 40px rgba(0,0,0,0.55), 0 0 30px rgba(255,107,53,0.55)" }
+              : undefined
+          }
+        >
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-orange">
-              STONE DEITY
+              {BOSS_IDENTITY.name}
             </span>
             <span className="font-mono text-xs text-bone">{bossHp * 10}/100</span>
           </div>
-          <BossHP segs={10} filled={bossHp} />
+          <BossHP segs={10} filled={bossHp} empowered={empowered} />
+          <MemoryGauge filled={memoryFilled} segments={MEMORY_GAUGE.segments} />
         </div>
 
         <HUD hp={playerHp} xp={80} level={7} coins={128} />
       </div>
 
       {/* Arena — boss upper, player lower-left */}
-      <div className="absolute inset-x-0 top-[220px] bottom-[240px] pointer-events-none z-20">
-        {/* Boss */}
-        <motion.div
-          animate={{
-            y: bossPose === "attack" ? -8 : bossPose === "hurt" ? 8 : [0, -4, 0],
-            x: bossPose === "attack" ? -12 : 0,
-          }}
-          transition={
-            bossPose === "idle"
-              ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
-              : { duration: 0.5 }
-          }
-          className="absolute top-4 left-1/2 -translate-x-1/2 w-56 h-64"
-          data-testid={`boss-pose-${bossPose}`}
-        >
-          <img
-            src={bossImg}
-            alt=""
-            className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(255,107,53,0.35)]"
-          />
-        </motion.div>
+      <div className="absolute inset-x-0 top-[260px] bottom-[240px] pointer-events-none z-20">
+        {/* Boss + optional RECALLING overlay */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-56 h-64">
+          <RecallingBossOverlay active={isRecalling} />
+          <motion.div
+            animate={{
+              y: bossPose === "attack" ? -8 : bossPose === "hurt" ? 8 : [0, -4, 0],
+              x: bossPose === "attack" ? -12 : 0,
+              scale: isRecalling ? [1, 1.04, 1] : 1,
+            }}
+            transition={
+              bossPose === "idle" || isRecalling
+                ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.5 }
+            }
+            className="relative w-full h-full"
+            data-testid={`boss-pose-${bossPose}`}
+          >
+            <img
+              src={bossImg}
+              alt=""
+              className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(255,107,53,0.35)]"
+              style={
+                isRecalling
+                  ? { filter: "drop-shadow(0 0 24px #00E5FF) brightness(1.15) saturate(1.2)" }
+                  : undefined
+              }
+            />
+          </motion.div>
+        </div>
 
         {/* Player */}
         <motion.div
@@ -168,16 +262,14 @@ export default function BossScreen() {
         </motion.div>
       </div>
 
+      {/* Screen-edge vignette during RECALLING */}
+      <RecallingVignette active={isRecalling} />
+
       {/* Bottom stack: dialogue OR question */}
       <div className="absolute inset-x-0 bottom-0 z-40 p-3 pb-5">
         <AnimatePresence mode="wait">
           {phase === "dialogue" && (
-            <motion.div
-              key="dialogue"
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-            >
+            <motion.div key="dialogue" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
               <DialogueBox
                 entry={BOSS_DIALOGUE[dialogueIdx]}
                 onAdvance={advanceDialogue}
@@ -186,21 +278,66 @@ export default function BossScreen() {
               />
             </motion.div>
           )}
-          {(phase === "question" || phase === "attacking") && (
+
+          {phase === "recalling" && (
             <motion.div
-              key="question"
+              key="recalling-tag"
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
             >
-              <QuestionCard
-                question={SAMPLE_QUESTION}
-                onAnswer={handleAnswer}
+              <div className="glass-panel px-4 py-3 flex items-center gap-3" data-testid="recalling-status">
+                <motion.div
+                  animate={{ rotate: [0, 12, -12, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-8 h-8 rounded-md flex items-center justify-center border border-cyan-mist bg-moss-dark"
+                  style={{ boxShadow: "0 0 18px rgba(0,229,255,0.6)" }}
+                >
+                  <svg viewBox="0 0 16 16" className="w-4 h-4">
+                    <circle cx="8" cy="8" r="6" stroke="#00E5FF" strokeWidth="1.4" fill="none" />
+                    <path d="M8 2 L8 14 M2 8 L14 8" stroke="#00E5FF" strokeWidth="1" />
+                  </svg>
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-mono text-[10px] tracking-[0.32em] uppercase text-cyan-mist">
+                    RECALLING…
+                  </p>
+                  <p className="font-body text-xs text-stone-pale italic">
+                    Vashkar is searching its memory of you.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {phase === "recalled" && (
+            <motion.div key="recalled" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
+              <DialogueBox
+                entry={RECALLED_DIALOGUE[recalledIdx]}
+                onAdvance={advanceRecalled}
+                index={recalledIdx}
+                total={RECALLED_DIALOGUE.length}
+                recalled
               />
+            </motion.div>
+          )}
+
+          {(phase === "question" || phase === "attacking") && (
+            <motion.div key="question" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
+              <QuestionCard question={SAMPLE_QUESTION} onAnswer={handleAnswer} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Memory sidebar */}
+      <MemorySidebar
+        open={sidebarOpen}
+        onClose={closeSidebar}
+        shards={MEMORY_SHARDS}
+        bossName={BOSS_IDENTITY.name}
+        source={BOSS_IDENTITY.memory_source}
+      />
 
       <EmberParticles count={18} />
     </MotionScreen>

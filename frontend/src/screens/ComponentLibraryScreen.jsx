@@ -5,6 +5,10 @@ import { IMG, ZONES } from "../data/game";
 import { EmberParticles, MotionScreen, RuneDivider } from "../components/Atmosphere";
 import { LevelNode, ZoneBanner } from "../components/LevelNode";
 import { HeartsHUD, XPBar, CoinCounter, StarRating } from "../components/HUD";
+import { MemoryShard, MemoryShardEmpty } from "../components/MemoryShard";
+import { MemoryGauge } from "../components/MemoryGauge";
+import { MEMORY_SHARDS, EMPTY_MEMORY_MESSAGE } from "../data/memory";
+import { DialogueBox } from "../components/DialogueBox";
 import { ArrowLeft } from "lucide-react";
 
 const Section = ({ title, subtitle, children }) => (
@@ -195,6 +199,68 @@ export default function ComponentLibraryScreen() {
               <p className="font-heading text-cyan-mist tracking-widest text-[10px] uppercase">Sway</p>
               <img src={IMG.prop_plant} alt="" className="w-12 h-12 mx-auto object-contain animate-sway" />
             </div>
+          </div>
+        </Section>
+
+        {/* Cognee Memory System */}
+        <Section subtitle="09 — Cognee" title="Memory System">
+          <p className="font-body text-xs text-stone-pale italic mb-3">
+            All shards, journal rows, and recalled lines render from a single mock
+            <code className="mx-1 font-mono text-[10px] text-cyan-mist">/data/memory.js</code>
+            object — swap it with the real Cognee API response.
+          </p>
+
+          <p className="font-mono text-[9px] tracking-[0.3em] text-cyan-mist/80 uppercase mb-1.5">
+            Memory Shards (4 variants)
+          </p>
+          <div className="space-y-2">
+            {MEMORY_SHARDS.map((s, i) => (
+              <MemoryShard key={s.id} shard={s} index={i} />
+            ))}
+          </div>
+
+          <div className="mt-3">
+            <p className="font-mono text-[9px] tracking-[0.3em] text-cyan-mist/80 uppercase mb-1.5">
+              Empty State
+            </p>
+            <MemoryShardEmpty message={EMPTY_MEMORY_MESSAGE} />
+          </div>
+
+          <div className="mt-4">
+            <p className="font-mono text-[9px] tracking-[0.3em] text-cyan-mist/80 uppercase mb-2">
+              Memory Gauge — 3 states
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] w-14 text-stone-pale uppercase">empty</span>
+                <MemoryGauge filled={0} />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] w-14 text-stone-pale uppercase">partial</span>
+                <MemoryGauge filled={3} />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] w-14 text-stone-pale uppercase">full</span>
+                <MemoryGauge filled={5} />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="font-mono text-[9px] tracking-[0.3em] text-cyan-mist/80 uppercase mb-2">
+              Recalled Dialogue variant
+            </p>
+            <DialogueBox
+              entry={{
+                speaker: "boss",
+                name: "Vashkar",
+                text: "Arrays again, little flame? I remember every time they burned you.",
+              }}
+              onAdvance={() => {}}
+              index={0}
+              total={1}
+              recalled
+            />
           </div>
         </Section>
 

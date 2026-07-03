@@ -383,3 +383,15 @@
 ::-webkit-scrollbar-track { background: #0B120C; }
 ::-webkit-scrollbar-thumb { background: #2A3F2D; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #3F5A42; }
+
+/* prefers-reduced-motion — quiet all decorative/loop animations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}

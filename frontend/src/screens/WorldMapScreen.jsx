@@ -1,15 +1,18 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LEVELS, ZONES, IMG } from "../data/game";
+import { ECHOES_JOURNAL } from "../data/memory";
 import { LevelNode, ZoneBanner } from "../components/LevelNode";
 import { EmberParticles, CyanMist, LightShaft, MotionScreen } from "../components/Atmosphere";
 import { HUD } from "../components/HUD";
+import { EchoesJournal, EchoesTrigger } from "../components/EchoesJournal";
 import { Settings, MapPin } from "lucide-react";
 
 // The vertically scrolling S-curve world map
 export default function WorldMapScreen({ onOpenSettings }) {
   const navigate = useNavigate();
+  const [echoesOpen, setEchoesOpen] = useState(false);
 
   // Node vertical spacing (px) — total scroll length
   const rowH = 108;
@@ -66,6 +69,7 @@ export default function WorldMapScreen({ onOpenSettings }) {
               DUNGEON OF RECALL
             </span>
           </div>
+          <EchoesTrigger onClick={() => setEchoesOpen(true)} />
         </div>
         <HUD hp={4} xp={64} level={7} coins={128} />
       </div>
@@ -188,6 +192,13 @@ export default function WorldMapScreen({ onOpenSettings }) {
       </div>
 
       <EmberParticles count={10} />
+
+      {/* ECHOES journal overlay */}
+      <EchoesJournal
+        open={echoesOpen}
+        onClose={() => setEchoesOpen(false)}
+        data={ECHOES_JOURNAL}
+      />
     </MotionScreen>
   );
 }
