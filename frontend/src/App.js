@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Map, Swords, Skull, LayoutGrid, Grid3x3, Settings as SettingsIcon, X, Volume2 } from "lucide-react";
@@ -103,6 +103,7 @@ const SettingsModal = ({ open, onClose }) => (
               <p className="font-display text-2xl font-bold text-bone">Settings</p>
             </div>
           </DialogTitle>
+          <DialogDescription className="sr-only">Adjust music, sfx, haptics, and mist FX for the game.</DialogDescription>
           <button
             onClick={onClose}
             data-testid="settings-close"
